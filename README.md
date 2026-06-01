@@ -57,3 +57,14 @@ En `GET /summary`:
 - `evictions_total`, `eviction_rate_per_min`
 - `cache_efficiency` (aprox. usando latencia promedio hit/miss)
 
+
+## Configuración de Kafka (Tarea 2)
+Para la comunicación asíncrona, se utilizan los siguientes tópicos:
+* `queries-main`: Tópico principal para consultas nuevas.
+* `queries-retry`: Tópico para consultas que fallan temporalmente y necesitan reintento.
+* `queries-dlq`: Dead Letter Queue para consultas que agotaron sus reintentos.
+
+**Variables de entorno principales:**
+* `KAFKA_BOOTSTRAP`: Dirección del broker de Kafka (ej. `kafka:29092` dentro de Docker).
+
+
