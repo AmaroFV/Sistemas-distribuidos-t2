@@ -136,7 +136,32 @@ services:
       - kafka
     networks:
       - dist_net
-      
+
+  kafka_consumer:
+    build:
+      context: ./t2_standalone
+      dockerfile: kafka_consumer/Dockerfile
+    environment:
+      - KAFKA_BOOTSTRAP=kafka:29092
+      - TOPIC_MAIN=queries-main
+      - TOPIC_RETRY=queries-retry
+      - TOPIC_DLQ=queries-dlq
+      - KAFKA_GROUP_ID=query-processors
+      - MAX_RETRIES=${MAX_RETRIES:-5}
+      - CACHE_URL=http://cache_service:8001/query
+      - METRICS_URL=http://metrics_service:8002/event
+    depends_on:
+      - kafka-init
+      - cache_service
+      - metrics_service
+    deploy:
+      replicas: ${KAFKA_CONSUMER_REPLICAS:-1}
+    profiles:
+      - kafka
+    networks:
+      - dist_net
+
+
 # Declaración global de redes
 networks:
   dist_net:
