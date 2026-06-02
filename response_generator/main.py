@@ -4,8 +4,26 @@ from typing import Optional
 import pandas as pd
 import numpy as np
 import os
+import random
+import time
 
 app = FastAPI()
+
+FAIL_RATE = float(os.getenv("FAIL_RATE", "0"))  # 0.0–1.0 errores 503 aleatorios
+FAIL_UNTIL = float(
+    os.getenv("FAIL_UNTIL", "0")
+)  # epoch: rechazar todo hasta este tiempo
+ARTIFICIAL_LATENCY_MS = float(os.getenv("ARTIFICIAL_LATENCY_MS", "0"))
+
+
+def _simulate_failure() -> None:
+    if FAIL_UNTIL and time.time() < FAIL_UNTIL:
+        raise HTTPException(status_code=503, detail="Servicio caído (simulación)")
+    if FAIL_RATE > 0 and random.random() < FAIL_RATE:
+        raise HTTPException(status_code=503, detail="Error temporal simulado")
+    if ARTIFICIAL_LATENCY_MS > 0:
+        time.sleep(ARTIFICIAL_LATENCY_MS / 1000.0)
+
 
 # Zonas definidas en la rúbrica
 ZONES = {
@@ -105,6 +123,9 @@ class QueryRequest(BaseModel):
 
 @app.post("/query")
 def process_query(req: QueryRequest):
+
+    _simulate_failure()
+
     q_type = req.query_type.upper()
 
     if q_type in ["Q1", "Q2", "Q3", "Q5"]:
