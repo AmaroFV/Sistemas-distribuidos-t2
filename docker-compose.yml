@@ -116,6 +116,27 @@ services:
     networks:
       - dist_net
 
+  kafka_producer:
+    build:
+      context: ./t2_standalone
+      dockerfile: kafka_producer/Dockerfile
+    container_name: kafka_producer
+    environment:
+      - KAFKA_BOOTSTRAP=kafka:29092
+      - TOPIC_MAIN=queries-main
+      - DISTRIBUTION=${DISTRIBUTION:-zipf}
+      - TOTAL_REQUESTS=${TOTAL_REQUESTS:-5000}
+      - WARMUP_REQUESTS=${WARMUP_REQUESTS:-200}
+      - RATE_RPS=${RATE_RPS:-0}
+      - ZIPF_S=${ZIPF_S:-1.2}
+    depends_on:
+      - kafka-init
+      - cache_service
+    profiles:
+      - kafka
+    networks:
+      - dist_net
+      
 # Declaración global de redes
 networks:
   dist_net:
