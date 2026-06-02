@@ -89,17 +89,24 @@ async def get_metrics_summary():
     hit_rate = (hits / total) if total > 0 else 0
     miss_rate = (misses / total) if total > 0 else 0
 
-    # Cálculo de Throughput (Consultas/segundo) [cite: 180]
-    if total > 1:
-        duration = df["timestamp"].max() - df["timestamp"].min()
-        throughput = total / duration if duration > 0 else 0
+    # --- MODIFICADO: Throughput y Latencias T2
+    # Ahora se calculan en base a consultas exitosas end-to-end
+    success_df = df[df["event_type"] == "query_success"]
+
+    if len(success_df) > 1:
+        duration = success_df["timestamp"].max() - success_df["timestamp"].min()
+        throughput = len(success_df) / duration if duration > 0 else 0
     else:
         throughput = 0
 
-    # Latencias Percentiles p50 y p95 [cite: 180]
-    latencies = df[df["latency_ms"].notnull()]["latency_ms"]
-    p50 = latencies.quantile(0.5) if not latencies.empty else 0
-    p95 = latencies.quantile(0.95) if not latencies.empty else 0
+    latencies = (
+        success_df["latency_ms"].dropna()
+        if "latency_ms" in success_df
+        else pd.Series(dtype=float)
+    )
+    p50 = float(latencies.quantile(0.5)) if len(latencies) else 0
+    p95 = float(latencies.quantile(0.95)) if len(latencies) else 0
+    # ---------------------------------------------------------
 
     # Eviction rate (evictions/min)
     evictions = len(df[df["event_type"] == "eviction"])
