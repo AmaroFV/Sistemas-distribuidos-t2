@@ -14,20 +14,34 @@ events_db = []
 
 class EventRecord(BaseModel):
     timestamp: float
-    event_type: str  # "cache_hit", "cache_miss", "eviction"
+    event_type: str  # Ahora recibirá "query_success", "query_retry", etc.
     query_type: Optional[str] = None
     latency_ms: Optional[float] = None
     zone_id: Optional[str] = None
+    # --- NUEVO PARA KAFKA
+    query_id: Optional[str] = None
+    retry_count: Optional[int] = None
+    consumer_id: Optional[str] = None
 
 
-# Crear el CSV de métricas si no existe [cite: 180]
+# Actualizacion de cabezera del CSV
 def init_csv():
     os.makedirs(os.path.dirname(CSV_FILE_PATH), exist_ok=True)
     if not os.path.exists(CSV_FILE_PATH):
         with open(CSV_FILE_PATH, mode="w", newline="") as file:
             writer = csv.writer(file)
+            # --- MODIFICADO: Agregamos las nuevas columnas ---
             writer.writerow(
-                ["timestamp", "event_type", "query_type", "latency_ms", "zone_id"]
+                [
+                    "timestamp",
+                    "event_type",
+                    "query_type",
+                    "latency_ms",
+                    "zone_id",
+                    "query_id",
+                    "retry_count",
+                    "consumer_id",
+                ]
             )
 
 
@@ -44,6 +58,10 @@ def save_event_to_csv(event: EventRecord):
                 event.query_type,
                 event.latency_ms,
                 event.zone_id,
+                # --- NUEVOS CAMBIOS PARA KAFKA
+                event.query_id,
+                event.retry_count,
+                event.consumer_id,
             ]
         )
 
@@ -101,7 +119,9 @@ async def get_metrics_summary():
     ]
     t_cache = float(hit_lat.mean()) if not hit_lat.empty else 0.0
     t_db = float(miss_lat.mean()) if not miss_lat.empty else 0.0
-    cache_efficiency = ((hits * t_cache) - (misses * t_db)) / total if total > 0 else 0.0
+    cache_efficiency = (
+        ((hits * t_cache) - (misses * t_db)) / total if total > 0 else 0.0
+    )
 
     return {
         "hit_rate": round(hit_rate, 4),
