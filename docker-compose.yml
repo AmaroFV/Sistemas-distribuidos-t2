@@ -12,13 +12,19 @@ services:
 
   # 2. Servicio de Métricas
   metrics_service:
-    build: ./metrics
-    container_name: metrics_api
+    build:
+      context: .
+      dockerfile: metrics/Dockerfile
+    container_name: metrics_api_t2
     ports:
       - "8002:8002"
     volumes:
-      # Montamos la carpeta data para que el CSV sobreviva si el contenedor se apaga
       - ./data:/app/data
+    environment:
+      - KAFKA_BOOTSTRAP=kafka:29092
+      - ENABLE_BACKLOG_POLL=true
+    depends_on:
+      - kafka
     networks:
       - dist_net
 
@@ -139,7 +145,7 @@ services:
 
   kafka_consumer:
     build:
-      context: ./t2_standalone
+      context: .
       dockerfile: kafka_consumer/Dockerfile
     environment:
       - KAFKA_BOOTSTRAP=kafka:29092
