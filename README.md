@@ -1,12 +1,10 @@
 # Procesamiento Geoespacial Asíncrono Orientado a Eventos (Tarea 2)
 
-Este repositorio contiene la evolución de la arquitectura de software distribuida para el procesamiento de consultas geoespaciales masivas basadas en el dataset de *Google Open Building*. 
-
 **Evolución del Sistema:** En la Tarea 1 se implementó un flujo síncrono y secuencial a través de HTTP. Para esta Tarea 2, el sistema se ha transformado por completo en una **arquitectura orientada a eventos asíncrona** utilizando **Apache Kafka** como bróker central de mensajería. Esto permite gestionar la contrapresión (*backpressure*), desacoplar los componentes y garantizar la resiliencia mediante colas de reintento y aislamiento de errores.
 
 ---
 
-## 📂 Requisitos y Preparación del Dataset
+## Requisitos y Preparación del Dataset
 
 El sistema completo se ejecuta dentro de contenedores orquestados de forma distribuida.
 
@@ -23,7 +21,7 @@ El módulo de procesamiento (`response_generator`) cargará en memoria el archiv
 
 ---
 
-## 🏛️ Arquitectura y Módulos del Sistema
+## Arquitectura y Módulos del Sistema
 
 El ecosistema distribuido está compuesto por los siguientes módulos que interactúan de forma asíncrona:
 
@@ -40,7 +38,7 @@ El ecosistema distribuido está compuesto por los siguientes módulos que intera
 
 ---
 
-## ⚙️ Parámetros de Configuración de Experimentos
+## Parámetros de Configuración de Experimentos
 
 El comportamiento del clúster distributed puede alterarse modificando las variables de entorno dentro del archivo `docker-compose.yml`:
 
@@ -62,7 +60,7 @@ El comportamiento del clúster distributed puede alterarse modificando las varia
 
 ---
 
-## ✉️ Estructura del Mensaje (Envelope JSON)
+## Estructura del Mensaje (Envelope JSON)
 
 Cada evento encolado en Kafka se transmite bajo un contrato estructurado en JSON para asegurar el rastreo de extremo a extremo:
 
