@@ -1,8 +1,9 @@
 services:
-  # 1. Base de datos Redis
+  # 1. Base de datos Redis (El motor del Caché)
   redis-server:
     image: redis:alpine
     container_name: redis_cache
+    # Aquí es donde variarán los parámetros para los experimentos del informe (50mb, 200mb, etc y LRU/LFU)
     command: redis-server --maxmemory 10mb --maxmemory-policy allkeys-lru
     ports:
       - "6379:6379"
@@ -11,9 +12,7 @@ services:
 
   # 2. Servicio de Métricas
   metrics_service:
-    build:
-      context: .
-      dockerfile: metrics/Dockerfile
+    build: ./metrics
     container_name: metrics_api_t2
     ports:
       - "8002:8002"
@@ -52,6 +51,7 @@ services:
       - REDIS_PORT=6379
       - RESPONSE_GEN_URL=http://response_generator:8000/query
       - METRICS_URL=http://metrics_service:8002/event
+      # TTL para el Experimento D (5s / 60s / 300s)
       - TTL_SECONDS=${TTL_SECONDS:-60}
     depends_on:
       - redis-server
@@ -66,7 +66,9 @@ services:
     container_name: traffic_sim
     environment:
       - CACHE_URL=http://cache_service:8001/query
+      # Aquí se configura si usan Zipf o Uniforme para sus pruebas
       - DISTRIBUTION=${DISTRIBUTION:-uniform}
+      # Parámetros para controlar el tamaño de la corrida (útil para los experimentos)
       - TOTAL_REQUESTS=${TOTAL_REQUESTS:-5000}
       - WARMUP_REQUESTS=${WARMUP_REQUESTS:-200}
       - RATE_RPS=${RATE_RPS:-25}
@@ -75,6 +77,8 @@ services:
       - cache_service
     networks:
       - dist_net
+    profiles:
+      - sync
 
 #Nueva Secciones
   zookeeper:
