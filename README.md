@@ -1,4 +1,4 @@
-# Procesamiento Geoespacial Asíncrono Orientado a Eventos (Tarea 2)
+# Tarea 2 SD
 
 **Evolución del Sistema:** En la Tarea 1 se implementó un flujo síncrono y secuencial a través de HTTP. Para esta Tarea 2, el sistema se ha transformado por completo en una **arquitectura orientada a eventos asíncrona** utilizando **Apache Kafka** como bróker central de mensajería. Esto permite gestionar la contrapresión (*backpressure*), desacoplar los componentes y garantizar la resiliencia mediante colas de reintento y aislamiento de errores.
 
