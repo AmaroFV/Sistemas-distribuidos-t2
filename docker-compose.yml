@@ -12,9 +12,7 @@ services:
 
   # 2. Servicio de Métricas
   metrics_service:
-    build:
-      context: .
-      dockerfile: metrics/Dockerfile
+    build: ./metrics
     container_name: metrics_api_t2
     ports:
       - "8002:8002"
@@ -79,6 +77,8 @@ services:
       - cache_service
     networks:
       - dist_net
+    profiles:
+      - sync
 
 #Nueva Secciones
   zookeeper:
@@ -124,7 +124,7 @@ services:
 
   kafka_producer:
     build:
-      context: ./t2_standalone
+      context: .
       dockerfile: kafka_producer/Dockerfile
     container_name: kafka_producer
     environment:

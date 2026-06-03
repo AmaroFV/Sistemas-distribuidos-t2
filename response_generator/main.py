@@ -9,6 +9,19 @@ import time
 
 app = FastAPI()
 
+
+# Variable global para el cronómetro de caída
+_fail_until: float = 0.0
+
+
+@app.post("/admin/fail")
+async def trigger_failure(duration: int = 15):
+    """Fuerza al motor a rechazar peticiones temporalmente simulando una caída."""
+    global _fail_until
+    _fail_until = time.time() + duration
+    return {"status": "falla_simulada_activada", "duration_seconds": duration}
+
+
 FAIL_RATE = float(os.getenv("FAIL_RATE", "0"))  # 0.0–1.0 errores 503 aleatorios
 FAIL_UNTIL = float(
     os.getenv("FAIL_UNTIL", "0")
